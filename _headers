@@ -1,0 +1,7 @@
+# Netlify + Cloudflare Pages security headers (GitHub Pages ignores this file; the CSP <meta> in index.html still applies)
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
