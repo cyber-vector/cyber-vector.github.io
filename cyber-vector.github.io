@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
+<meta name="google-site-verification" content="zfdIvDeotCyHEHHpeLw9n1QbhoUwDPQKXIfv4mjQgDU" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
