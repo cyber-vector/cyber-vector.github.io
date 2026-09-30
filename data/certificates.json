@@ -13,5 +13,20 @@
     "type": "image",
     "featured": false,
     "visible": true
+  },
+  {
+    "id": "cert-002",
+    "title": "INTRODUCTION TO CYBER SECURITY",
+    "issuer": "Cisco",
+    "date": "2026-06-27",
+    "credentialId": "",
+    "credentialUrl": "",
+    "category": "CYBER SECURITY",
+    "description": "",
+    "image": "./certificates/introduction-to-cyber-security.png",
+    "thumbnail": "./certificates/thumbs/introduction-to-cyber-security.webp",
+    "type": "image",
+    "featured": false,
+    "visible": true
   }
 ]
