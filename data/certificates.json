@@ -1,20 +1,5 @@
 [
   {
-    "id": "cert-002",
-    "title": "AWS Security Fundamentals",
-    "issuer": "AWS Training & Certification",
-    "date": "2026-09-30",
-    "credentialId": "",
-    "credentialUrl": "",
-    "category": "Cloud Security",
-    "description": "Completion certificate for AWS Security Fundamentals.",
-    "image": "./certificates/aws-security-fundamentals.png",
-    "thumbnail": "",
-    "type": "image",
-    "featured": false,
-    "visible": true
-  },
-  {
     "id": "cert-001",
     "title": "Introduction to Cybersecurity",
     "issuer": "Cisco Networking Academy",
