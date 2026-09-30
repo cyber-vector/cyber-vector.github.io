@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
+  <link rel="stylesheet" href="./css/certifications.css"> 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
@@ -105,6 +106,7 @@
         <li><a href="#skills" data-nav="skills">SKILLS</a></li>
         <li><a href="#projects" data-nav="projects">PROJECTS</a></li>
         <li><a href="#research" data-nav="research">RESEARCH</a></li>
+        <li><a href="#certifications">CERTIFICATIONS</a></li>
         <li><a href="#tools" data-nav="tools">TOOLS</a></li>
         <li><a href="#github" data-nav="github">GITHUB</a></li>
         <li><a href="#contact" data-nav="contact">CONTACT</a></li>
@@ -253,6 +255,21 @@
     </section>
 
     <!-- ============ TOOLS ============ -->
+    <section id="certifications" class="section" data-nav-section="certifications" aria-labelledby="certifications-title">
+  <h2 id="certifications-title">CERTIFICATIONS</h2>
+  <p class="cert-sub">Verified learning, training and cybersecurity credentials.</p>
+
+  <div id="certificates-stats" class="cert-stats" aria-live="polite"></div>
+
+  <div class="cert-toolbar">
+    <input id="certificates-search" class="cert-search" type="search"
+           placeholder="SEARCH CERTIFICATIONS..." aria-label="Search certifications" autocomplete="off">
+    <div id="certificates-filters" class="cert-filters" role="group" aria-label="Filter by category"></div>
+  </div>
+
+  <div id="certificates-status" class="cert-status" role="status"></div>
+  <div id="certificates-grid" class="certificates-grid"></div>
+</section>
     <section id="tools" class="section" data-nav-section="tools" aria-labelledby="tools-title">
       <div class="container">
         <header class="section-head" data-reveal>
