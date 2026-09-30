@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>CYBER_VECTOR — Certificate Admin</title>
+<style>
+  :root{--bg:#030505;--panel:#07100d;--acc:#00ff41;--acc2:#00c853;--text:#f5f5f5;--mut:#8a9a90;--red:#ff304f;--blue:#00a8ff;--line:rgba(0,255,65,.18)}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;padding:1.5rem}
+  main{max-width:820px;margin:0 auto;display:grid;gap:1.5rem}
+  h1{font-size:1.2rem;letter-spacing:.08em;margin:0}
+  h2{font-size:.85rem;letter-spacing:.14em;margin:0 0 1rem;color:var(--acc)}
+  p.note{color:var(--mut);margin:.25rem 0 0;font-size:.85rem}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.25rem}
+  label{display:block;font-size:.7rem;letter-spacing:.1em;color:var(--mut);margin-bottom:.3rem}
+  input,select,textarea{width:100%;padding:.6rem .7rem;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;font:inherit}
+  textarea{min-height:70px;resize:vertical}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .full{grid-column:1/-1}
+  .row{display:flex;gap:1.25rem;flex-wrap:wrap;align-items:center}
+  .row label{display:flex;gap:.5rem;align-items:center;margin:0;color:var(--text);letter-spacing:0;font-size:.9rem}
+  .row input{width:auto}
+  button{font:inherit;font-size:.8rem;letter-spacing:.1em;padding:.65rem 1.1rem;border-radius:6px;cursor:pointer;background:var(--acc);color:var(--bg);border:1px solid var(--acc);font-weight:600}
+  button.ghost{background:transparent;color:var(--text);border-color:var(--line);font-weight:400}
+  button.danger{background:transparent;color:var(--red);border-color:var(--red);font-weight:400}
+  button:disabled{opacity:.5;cursor:wait}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  #log{white-space:pre-wrap;font:12px/1.6 ui-monospace,Consolas,monospace;color:var(--mut);min-height:1.5em}
+  #log .ok{color:var(--acc)} #log .err{color:var(--red)}
+  ul{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
+  li{display:flex;gap:.75rem;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:.7rem;border:1px solid var(--line);border-radius:8px}
+  li small{color:var(--mut);display:block}
+  li.hidden-cert .t{opacity:.5;text-decoration:line-through}
+  #preview{max-width:160px;max-height:120px;margin-top:.5rem;border-radius:6px;display:none}
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <h1>CYBER_VECTOR // CERTIFICATE ADMIN</h1>
+    <p class="note">Uploads go straight to your GitHub repository. Nothing is stored anywhere else.</p>
+  </div>
+
+  <section>
+    <h2>1. CONNECT</h2>
+    <div class="grid">
+      <div><label for="owner">GITHUB USERNAME</label><input id="owner" value="cyber-vector"></div>
+      <div><label for="repo">REPOSITORY</label><input id="repo" value="cyber-vector.github.io"></div>
+      <div><label for="branch">BRANCH</label><input id="branch" value="main"></div>
+      <div><label for="token">ACCESS TOKEN</label><input id="token" type="password" autocomplete="off" placeholder="github_pat_..."></div>
+      <div class="full"><button id="connect" type="button">CONNECT</button></div>
+    </div>
+    <p class="note">The token stays in this browser tab only and is cleared when you close it.</p>
+  </section>
+
+  <section id="add" hidden>
+    <h2>2. ADD CERTIFICATE</h2>
+    <div class="grid">
+      <div class="full"><label for="file">CERTIFICATE FILE (PNG, JPG, WEBP OR PDF)</label>
+        <input id="file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf">
+        <img id="preview" alt="Selected certificate preview"></div>
+      <div class="full"><label for="title">TITLE *</label><input id="title"></div>
+      <div><label for="issuer">ISSUER *</label><input id="issuer"></div>
+      <div><label for="date">DATE ISSUED *</label><input id="date" type="date"></div>
+      <div><label for="category">CATEGORY</label><input id="category" list="cats" placeholder="Cybersecurity"><datalist id="cats"></datalist></div>
+      <div><label for="credId">CREDENTIAL ID (OPTIONAL)</label><input id="credId"></div>
+      <div class="full"><label for="credUrl">VERIFY LINK (OPTIONAL)</label><input id="credUrl" type="url" placeholder="https://"></div>
+      <div class="full"><label for="desc">DESCRIPTION</label><textarea id="desc"></textarea></div>
+      <div class="full row">
+        <label><input type="checkbox" id="featured"> Featured</label>
+        <label><input type="checkbox" id="visible" checked> Visible on website</label>
+      </div>
+      <div class="full"><button id="upload" type="button">UPLOAD TO PORTFOLIO</button></div>
+    </div>
+  </section>
+
+  <section id="manage" hidden>
+    <h2>3. MANAGE EXISTING</h2>
+    <ul id="list"></ul>
+  </section>
+
+  <section><h2>LOG</h2><div id="log" role="status" aria-live="polite"></div></section>
+</main>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const JSON_PATH = 'data/certificates.json';
+  let certs = [], jsonSha = null;
+
+  $('owner').value = localStorage.getItem('cv_owner') || $('owner').value;
+  $('repo').value = localStorage.getItem('cv_repo') || $('repo').value;
+  $('branch').value = localStorage.getItem('cv_branch') || $('branch').value;
+  $('token').value = sessionStorage.getItem('cv_token') || '';
+
+  const log = (msg, cls) => {
+    const s = document.createElement('div');
+    if (cls) s.className = cls;
+    s.textContent = msg;
+    $('log').append(s);
+  };
+  const b64 = (buf) => {
+    const a = new Uint8Array(buf); let s = '';
+    for (let i = 0; i < a.length; i += 0x8000) s += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000));
+    return btoa(s);
+  };
+  const cfg = () => ({ o: $('owner').value.trim(), r: $('repo').value.trim(), b: $('branch').value.trim(), t: $('token').value.trim() });
+
+  async function gh(path, opts = {}) {
+    const { o, r, t } = cfg();
+    const res = await fetch(`https://api.github.com/repos/${o}/${r}/contents/${path}${opts.query || ''}`, {
+      method: opts.method || 'GET',
+      headers: { Authorization: `Bearer ${t}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    });
+    if (res.status === 404 && !opts.method) return null;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(`${res.status} ${data.message || 'GitHub error'}`);
+    return data;
+  }
+  const put = (path, base64, message, sha) => {
+    const { b } = cfg();
+    return gh(path, { method: 'PUT', body: { message, content: base64, branch: b, ...(sha ? { sha } : {}) } });
+  };
+
+  async function loadJson() {
+    const { b } = cfg();
+    const f = await gh(JSON_PATH, { query: `?ref=${encodeURIComponent(b)}` });
+    if (!f) { certs = []; jsonSha = null; return; }
+    const text = new TextDecoder().decode(Uint8Array.from(atob(f.content.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
+    certs = JSON.parse(text);
+    jsonSha = f.sha;
+  }
+  async function saveJson(message) {
+    const text = JSON.stringify(certs, null, 2) + '\n';
+    const res = await put(JSON_PATH, b64(new TextEncoder().encode(text)), message, jsonSha);
+    jsonSha = res.content.sha;
+  }
+
+  function renderList() {
+    const ul = $('list'); ul.replaceChildren();
+    $('cats').replaceChildren(...[...new Set(certs.map((c) => c.category).filter(Boolean))].map((v) => { const o = document.createElement('option'); o.value = v; return o; }));
+    if (!certs.length) { const li = document.createElement('li'); li.textContent = 'No certificates yet.'; ul.append(li); return; }
+    [...certs].sort((a, b) => String(b.date).localeCompare(String(a.date))).forEach((c) => {
+      const li = document.createElement('li');
+      if (c.visible === false) li.className = 'hidden-cert';
+      const info = document.createElement('div');
+      const t = document.createElement('span'); t.className = 't'; t.textContent = c.title;
+      const s = document.createElement('small'); s.textContent = `${c.issuer} · ${c.date}${c.visible === false ? ' · HIDDEN' : ''}`;
+      info.append(t, s);
+      const acts = document.createElement('div'); acts.className = 'row';
+      const tog = document.createElement('button'); tog.className = 'ghost'; tog.textContent = c.visible === false ? 'SHOW' : 'HIDE';
+      tog.onclick = () => change(`${c.visible === false ? 'Show' : 'Hide'} ${c.title}`, () => { c.visible = c.visible === false; });
+      const del = document.createElement('button'); del.className = 'danger'; del.textContent = 'REMOVE';
+      del.onclick = () => { if (confirm(`Remove "${c.title}" from the website?\n(The image file stays in your repo.)`)) change(`Remove ${c.title}`, () => { certs = certs.filter((x) => x !== c); }); };
+      acts.append(tog, del); li.append(info, acts); ul.append(li);
+    });
+  }
+  async function change(message, fn) {
+    try { fn(); await saveJson(`certs: ${message}`); log(`Saved: ${message}`, 'ok'); renderList(); }
+    catch (e) { log(`Error: ${e.message}`, 'err'); await loadJson().catch(() => {}); renderList(); }
+  }
+
+  $('connect').onclick = async () => {
+    const { o, r, b, t } = cfg();
+    if (!o || !r || !b || !t) return log('Fill in all four fields.', 'err');
+    localStorage.setItem('cv_owner', o); localStorage.setItem('cv_repo', r); localStorage.setItem('cv_branch', b);
+    sessionStorage.setItem('cv_token', t);
+    try {
+      await loadJson();
+      log(`Connected. ${certs.length} certificate(s) found.`, 'ok');
+      $('add').hidden = false; $('manage').hidden = false; renderList();
+    } catch (e) { log(`Connection failed: ${e.message}. Check the token, repo name and branch.`, 'err'); }
+  };
+
+  $('file').onchange = () => {
+    const f = $('file').files[0], p = $('preview');
+    if (f && f.type.startsWith('image/')) { p.src = URL.createObjectURL(f); p.style.display = 'block'; } else p.style.display = 'none';
+    if (f && !$('title').value) $('title').value = f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+  };
+
+  async function thumb(file) {
+    const bmp = await createImageBitmap(file);
+    const w = Math.min(640, bmp.width), h = Math.round(bmp.height * (w / bmp.width));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    cv.getContext('2d').drawImage(bmp, 0, 0, w, h);
+    const blob = await new Promise((res) => cv.toBlob(res, 'image/webp', 0.82));
+    return blob.arrayBuffer();
+  }
+
+  $('upload').onclick = async () => {
+    const btn = $('upload'), f = $('file').files[0];
+    const title = $('title').value.trim(), issuer = $('issuer').value.trim(), date = $('date').value;
+    if (!f) return log('Choose a certificate file first.', 'err');
+    if (!title || !issuer || !date) return log('Title, issuer and date are required.', 'err');
+    if (f.size > 20 * 1024 * 1024) return log('File is over 20 MB. Please compress it first.', 'err');
+
+    btn.disabled = true;
+    try {
+      const isPdf = f.type === 'application/pdf';
+      const ext = isPdf ? 'pdf' : (f.name.split('.').pop() || 'png').toLowerCase();
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'certificate';
+      const { b } = cfg();
+      let name = slug;
+      if (await gh(`certificates/${name}.${ext}`, { query: `?ref=${encodeURIComponent(b)}` })) name = `${slug}-${Date.now().toString(36)}`;
+
+      log('Uploading certificate file...');
+      await put(`certificates/${name}.${ext}`, b64(await f.arrayBuffer()), `certs: add file ${name}.${ext}`);
+
+      let thumbPath = '';
+      if (!isPdf) {
+        try {
+          log('Creating thumbnail...');
+          await put(`certificates/thumbs/${name}.webp`, b64(await thumb(f)), `certs: add thumbnail ${name}`);
+          thumbPath = `./certificates/thumbs/${name}.webp`;
+        } catch (e) { log(`Thumbnail skipped (${e.message}). The full image will be used.`); }
+      }
+
+      await loadJson(); // refresh in case the file changed elsewhere
+      const n = Math.max(0, ...certs.map((c) => parseInt(String(c.id).replace(/\D/g, ''), 10) || 0)) + 1;
+      certs.push({
+        id: `cert-${String(n).padStart(3, '0')}`, title, issuer, date,
+        credentialId: $('credId').value.trim(), credentialUrl: $('credUrl').value.trim(),
+        category: $('category').value.trim() || 'Other', description: $('desc').value.trim(),
+        image: `./certificates/${name}.${ext}`, thumbnail: thumbPath, type: isPdf ? 'pdf' : 'image',
+        featured: $('featured').checked, visible: $('visible').checked
+      });
+      log('Updating certificates.json...');
+      await saveJson(`certs: add ${title}`);
+      log(`Done. "${title}" will appear on the site after GitHub Pages redeploys (1–2 minutes).`, 'ok');
+      ['file', 'title', 'issuer', 'date', 'category', 'credId', 'credUrl', 'desc'].forEach((id) => { $(id).value = ''; });
+      $('preview').style.display = 'none';
+      renderList();
+    } catch (e) { log(`Error: ${e.message}`, 'err'); }
+    finally { btn.disabled = false; }
+  };
+})();
+</script>
+</body>
+</html>
