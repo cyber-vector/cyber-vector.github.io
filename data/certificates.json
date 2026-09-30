@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "cert-001",
+    "title": "AWS SECURITY FUNDAMENTALS",
+    "issuer": "AWS",
+    "date": "2026-09-30",
+    "credentialId": "",
+    "credentialUrl": "",
+    "category": "CYBER SECURITY",
+    "description": "",
+    "image": "./certificates/aws-security-fundamentals.png",
+    "thumbnail": "./certificates/thumbs/aws-security-fundamentals.webp",
+    "type": "image",
+    "featured": false,
+    "visible": true
+  }
+]
